@@ -1,0 +1,75 @@
+{
+  "Name": "Kurzes Quiz",
+  "Questions Random": false,
+  "ask wrong questions again": true,
+  "Number asked questions": 5,
+  "Background file": "",
+  "Text color": [255,255,255],
+  "Rect color": [63, 91, 204],
+  "Text on Rect color": [0,0,0],
+
+  "Questions": [
+    {
+      "Type": "Multiple Choice",
+      "Question": "Multiple Choice Frage",
+      "Question read time": 0,
+      "Answers": ["Mit beliebig vielen Antwortmöglichkeiten","Antwort 2"," Antwort 3","Antwort 4","Antwort 5"],
+      "Correct Answer": 0,
+      "Shuffle Answers": true,
+      "Points mode": "Add/remove points",
+      "reduction for wrong answer": 20,
+      "points for right answer": 70
+    },
+
+    {
+      "Type": "Building up Image",
+      "Image": "Beispiel Bild.png",
+      "Answer": "Moderne Kunst",
+      "Building Type": "Dots",
+      "Building Size": 25,
+      "Building Time": 40,
+      "Top Color": [30,30,30],
+
+      "Points mode": "Time points",
+      "start points": 150,
+      "point reduction per second": 10,
+      "min points": 30
+    },
+
+    {
+      "Type": "Building up Image",
+      "Image": "Beispiel Bild.png",
+      "Answer": "Moderne Kunst",
+      "Building Type": "Rect",
+      "Building Size": 25,
+      "Building Time": 40,
+      "Top Color": [30,30,30],
+
+      "Points mode": "Time points",
+      "start points": 150,
+      "point reduction per second": 10,
+      "min points": 30
+    },
+
+    {
+      "Type": "Question",
+      "Question": "Dies ist eine normale Frage, sogar mit Bild",
+      "Answer": "Dies ist die Antwort",
+      "Image": "Beispiel Bild.png",
+
+      "Points mode": "Add/remove points",
+      "reduction for wrong answer": 20,
+      "points for right answer": 60
+    },
+
+    {
+      "Type": "Question",
+      "Question": "Dies ist nur eine Frage",
+      "Answer": "Dies ist die Antwort",
+
+       "Points mode": "Add/remove points",
+      "reduction for wrong answer": 70,
+      "points for right answer": 30
+    }
+  ]
+}
