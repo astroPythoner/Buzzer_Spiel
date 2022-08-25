@@ -81,7 +81,8 @@ Frage mit beliebig vielen Antwortmöglichkeiten.
 "Question read time": 2,
 "Answers": ["<< Antwort 1 >>", "<< Antowrt 2 >>", "..."],
 "Correct Answer": 0,
-"Shuffle Answers": true,
+("Answer Explanation": "<< Erklärung >>", )
+"Shuffle Answers": true
 ```
 - Question: Die Frage
 - Question read time: Bevor die Antwortmöglichkeiten erscheinen wird erst nur
@@ -89,6 +90,7 @@ Frage mit beliebig vielen Antwortmöglichkeiten.
   Sekunden man zum Lesen hat.
 - Answers: Antwortmäglichkeiten in einem Feld
 - Correct Answer: Die Nummer der richtigen Antwort (mit 0 anfangen zu zählen)
+- Answer Explanation: Erklärung zur richtigen Antwort (diese kann nach beantworten der Frage angeziegt werden)
 - Shuffle Answers: Wenn 'true' werden die Antworten in zufälliger Reihenfolge angezeigt,
   ansonsten bei 'false' in der vorgegebenen Reihenfolge
 
@@ -97,14 +99,18 @@ Bild, dass sich Stück für Stück aufbaut.
 ```
 "Type": "Building up Image",
 "Image": "<< Dateiname des Bildes >>",
+"Question": "<< Frage >>",
 "Answer": "<< Antowrt >>",
+("Answer Explanation": "<< Erklärung >>", )
 "Building Type": "Rect",
 "Building Size": 25,
 "Building Time": 8,
-"Top Color": [30,30,30],
+"Top Color": [30,30,30]
 ```
 - Image: Dateiname für das Bild (Datei muss im Ordner 'img' liegen)
+- Qustion: Frage die zum Bild gestellt werden soll (z.B Was ist hier zu sehen?)
 - Answer: richtige Antwort
+- Answer Explanation: Erklärung zur richtigen Antwort (diese kann nach beantworten der Frage angeziegt werden)
 - Building Type: Art, wie das Bild Stück für Stück auftaucht
   ('Random': eines der nachfolgenden zufällig,
   'Rect': in Rechtecken, 'Dots': durch zufällig plazierte Kreise)
@@ -119,10 +125,12 @@ Bild, dass sich Stück für Stück aufbaut.
 "Type": "Question",
 "Question": "<< Frage >>",
 "Answer": "<< Antwort >>",
-( "Image": "example_building_up.png", )
+("Answer Explanation": "<< Erklärung >>", )
+( "Image": "example_building_up.png")
 ```
 - Question: Die Frage
 - Answer: Die Antwort
+- Answer Explanation: Erklärung zur richtigen Antwort (diese kann nach beantworten der Frage angeziegt werden)
 - Image: Wenn dieser Wert vorhanden ist wird zusätzlich zur Frage noch ein Bild
   gezeigt (Datei muss im Ordner 'img' liegen)
   
@@ -147,7 +155,9 @@ Punkte je nachdem wie schnell geantwortet wurde.
 "start points": 150,
 "point reduction per second": 10,
 "min points": 30
+"reduction for wrong answer": 20,
 ```
 - start points: Punktzahl am Anfang (maximal erreichbar)
 - point reduction per second: Weniger Punkte pro Sekunde
 - min points: Mindest Anzahl an Punkten, nachdem der Wert nicht weiter sinkt
+- reduction for wrong answer: Abzug für falsche Antworten
