@@ -70,10 +70,13 @@ class Game:
         self.teams = list(TEAMS.keys())
 
         ##e## question
+        self.show_picture = False
+        self.correct = False
         self.quiz_list = get_quiz_list(project_name)
         self.quiz:Quiz = None
         self.in_asking_question = False  # question is shown and asked
         self.in_asking_correct = False  # waiting for game leader to click whether answer was correct or not
+        self.show_solution = False  # User can show and hide solution
         self.in_showing_results = False  # showing results of answer
         self.in_show_quiz_result = False  # showing result of quiz
         self.answering_player = 0
@@ -123,7 +126,7 @@ class Game:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                 self.in_asking_question = False
                 self.in_asking_correct = True
-                add_correct_selection(self.world, screen)
+                add_correct_selection(self.world, screen, self.text_size)
                 self.quiz.answer_given()
                 self.answering_player = 0
         elif not self.world.menu.get_paused():
@@ -207,29 +210,50 @@ class Game:
             elif self.in_asking_correct:
                 # select answer correct or wrong
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    correct = None
-                    if pygame.Rect(screen.get_width() * (1 / 3) - 87, screen.get_height() / 2 - 25, 175, 50).collidepoint(event.pos): correct = False
-                    if pygame.Rect(screen.get_width() * (2 / 3) - 87, screen.get_height() / 2 - 25, 175, 50).collidepoint(event.pos): correct = True
-                    if correct is not None:
+                    if self.show_picture:
+                        self.show_picture = False
+                    self.correct = None
+                    if pygame.Rect(screen.get_width() * (1 / 3) - 87*self.text_size, screen.get_height() * 1/3 - 25*self.text_size, 175*self.text_size, 50*self.text_size).collidepoint(event.pos):
+                        self.correct = False
+                        self.show_solution = False
+                    if pygame.Rect(screen.get_width() * (2 / 3) - 87*self.text_size, screen.get_height() * 1/3 - 25*self.text_size, 175*self.text_size, 50*self.text_size).collidepoint(event.pos):
+                        self.correct = True
+                        self.show_solution = False
+                    if self.correct is not None:
                         before = self.get_leader_board()
-                        self.points[self.answering_player] += self.quiz.get_points(correct)
+                        self.points[self.answering_player] += self.quiz.get_points(self.correct)
                         after = self.get_leader_board()
+                        self.in_showing_results = True
                         self.in_asking_correct = False
-                        if self.quiz.next_question(correct,screen.get_size(),self.text_size): self.in_show_quiz_result = True
-                        else: self.in_showing_results = True
-                        self.world.objects[0].show_results(correct,screen)
-                        self.world.objects[-1].show_results(correct,screen)
+                        self.world.objects[0].show_results(self.correct,screen)
+                        self.world.objects[-1].show_results(self.correct,screen)
                         if self.get_using_teams():
                             self.leader_board = Leader_Board(self.world, self.teams[self.answering_player], before, after, screen, self.get_using_teams(), {self.player_names[num]:self.teams[num] for num in range(NUM_BUZZERS)}, self.player_names, self.quiz.text_color, self.quiz.rect_color,self.quiz.text_on_rect_color, self.text_size, self.in_show_quiz_result)
                         else:
                             self.leader_board = Leader_Board(self.world,self.player_names[self.answering_player],before,after,screen, self.get_using_teams(), {self.player_names[num]:self.teams[num] for num in range(NUM_BUZZERS)}, self.player_names, self.quiz.text_color, self.quiz.rect_color,self.quiz.text_on_rect_color, self.text_size, self.in_show_quiz_result)
                         self.world.objects.add_object(self.leader_board)
                         if self.arduino != "DUMMY": self.arduino.write(b'o\n')
+                    # Toggle show solution
+                    elif pygame.Rect(screen.get_width()/2 - 87*self.text_size, screen.get_height() * 4/7 - 25*self.text_size, 175*self.text_size, 50*self.text_size).collidepoint(event.pos):
+                        self.show_solution = not self.show_solution
+                    elif pygame.Rect(screen.get_width()/2 - 87*self.text_size, screen.get_height() * 4/7 - 85*self.text_size, 175*self.text_size, 50*self.text_size).collidepoint(event.pos):
+                        self.show_picture = True
             elif self.in_showing_results:
                 if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    ask_again = False
+                    if event.type == pygame.MOUSEBUTTONDOWN and self.quiz.reask_wrong_questions and not self.correct and pygame.Rect(0, screen.get_height()*2/3, screen.get_width() / 3, screen.get_height() / 3).collidepoint(event.pos):
+                        ask_again = True
                     self.world.objects.delete_all()
                     self.in_showing_results = False
-                    self.in_asking_question = True
+                    if self.quiz.next_question(ask_again,screen.get_size(), self.text_size) and not ask_again:
+                        self.in_show_quiz_result = True
+                        if self.get_using_teams():
+                            self.leader_board = Leader_Board(self.world, self.teams[self.answering_player], self.get_leader_board(), self.get_leader_board(), screen, self.get_using_teams(), {self.player_names[num]: self.teams[num] for num in range(NUM_BUZZERS)}, self.player_names, self.quiz.text_color, self.quiz.rect_color, self.quiz.text_on_rect_color, self.text_size, self.in_show_quiz_result)
+                        else:
+                            self.leader_board = Leader_Board(self.world, self.player_names[self.answering_player], self.get_leader_board(), self.get_leader_board(), screen, self.get_using_teams(), {self.player_names[num]: self.teams[num] for num in range(NUM_BUZZERS)}, self.player_names, self.quiz.text_color, self.quiz.rect_color, self.quiz.text_on_rect_color, self.text_size, self.in_show_quiz_result)
+                        self.world.objects.add_object(self.leader_board)
+                    else:
+                        self.in_asking_question = True
                     if self.arduino != "DUMMY": self.arduino.write(b's\n')
             elif self.in_show_quiz_result:
                 if (event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN) and time.time()-self.leader_board.time > 3:
@@ -275,7 +299,7 @@ class Game:
                 if pressed_button != 0:
                     self.in_asking_question = False
                     self.in_asking_correct = True
-                    add_correct_selection(self.world,screen)
+                    add_correct_selection(self.world,screen,self.text_size)
                     self.quiz.answer_given()
                     self.answering_player = pressed_button-1
             except Exception:
@@ -322,16 +346,35 @@ class Game:
                     pygame.draw.rect(screen, (252, 51, 35), (screen.get_width()/2-screen.get_width()/3,screen.get_height()-50,screen.get_width()*(2/3),37), border_radius=8)
                     pygine.draw_text(screen,self.connection_warning,27,screen.get_width()/2,screen.get_height()-45,rect_place=pygine.TOP)
                 else:
-                    pygine.draw_text(screen, "Weiter mit Start/Leertaste", 20, screen.get_width()/2, screen.get_height()-15, color=(0,0,0), rect_place="center")
+                    pygine.draw_text(screen, "Weiter mit Start/Leertaste", 20, screen.get_width()/2, screen.get_height()-15, color=(0,0,0), rect_place=pygine.CENTER)
             elif self.in_asking_question:
                 self.quiz.draw(screen)
             elif self.in_asking_correct or self.in_showing_results or (self.in_show_quiz_result and self.leader_board.get_draw_on_top()):
                 text = f"{self.teams[self.answering_player]} - {self.player_names[self.answering_player]}" if self.get_using_teams() else f"{self.player_names[self.answering_player]}"
                 pygine.draw_text(screen, text, 35*self.text_size, screen.get_width()/2, 50, color=self.quiz.text_color, rect_place=pygine.CENTER)
                 if self.in_showing_results:
-                    pygine.draw_text(screen,"weiter",27,screen.get_width()-15,screen.get_height()-15,color=(150,150,150),rect_place=pygine.RIGHT_BOTTOM)
+                    if self.quiz.reask_wrong_questions and not self.correct:
+                        pygine.draw_text(screen, "nochmal stellen", 27 * self.text_size, 15, screen.get_height() - 15, color=(150, 150, 150), rect_place=pygine.LEFT_BOTTOM)
+                    pygine.draw_text(screen,"weiter",27*self.text_size,screen.get_width()-15,screen.get_height()-15,color=(150,150,150),rect_place=pygine.RIGHT_BOTTOM)
+                # show solution
+                if self.in_asking_correct:
+                    if self.show_picture:
+                        screen.blit(self.quiz.question_attributes["img"], (10 + self.quiz.question_attributes["pos"].x, len(self.quiz.question_attributes["texts"]) * 60 * self.text_size - 30 * self.text_size + 75 * self.text_size + 15 + self.quiz.question_attributes["pos"].y))
+                    else:
+                        if self.quiz.question["Type"] == "Building up Image":
+                            pygame.draw.rect(screen, self.quiz.rect_color, (screen.get_width()/2 - 87*self.text_size, screen.get_height() * 4/7 - 85*self.text_size, 175*self.text_size, 50*self.text_size), border_radius=int(8 * self.text_size))
+                            pygine.draw_text(screen, "Bild", 35*self.text_size, int(screen.get_width()/2), int(screen.get_height() * 4/7 - 60*self.text_size), color=self.quiz.text_color, rect_place=pygine.CENTER)
+                        pygame.draw.rect(screen, self.quiz.rect_color, (screen.get_width()/2 - 87*self.text_size, screen.get_height() * 4/7 - 25*self.text_size, 175*self.text_size, 50*self.text_size), border_radius=int(8*self.text_size))
+                        pygine.draw_text(screen, "Lösung", 35*self.text_size, int(screen.get_width()/2), int(screen.get_height() * 4/7), color=self.quiz.text_color, rect_place=pygine.CENTER)
+                        if self.show_solution:
+                            solution_texts = pygine.split_text_into_lines_fitting_width(self.quiz.solution,25*self.text_size,screen.get_width()-50)
+                            for count,line in enumerate(solution_texts):
+                                pygine.draw_text(screen, solution_texts[count], 25*self.text_size, int(screen.get_width()/2), int(screen.get_height() * 4/7) + 55*self.text_size + (25*self.text_size + 5)*count, color=self.quiz.text_color, rect_place=pygine.CENTER)
+                            explanation_texts = pygine.split_text_into_lines_fitting_width(self.quiz.solution_explanation,25*self.text_size,screen.get_width()-50)
+                            for count,line in enumerate(explanation_texts):
+                                pygine.draw_text(screen, explanation_texts[count], 18*self.text_size, int(screen.get_width()/2), int(screen.get_height() * 4/7) + 70*self.text_size + (25*self.text_size + 5)*len(solution_texts) + (25*self.text_size + 5)*count, color=self.quiz.text_color, rect_place=pygine.CENTER)
             if self.in_show_quiz_result:
-                pygine.draw_text(screen,"neues Quiz",27,screen.get_width()-15,screen.get_height()-15,color=(150,150,150),rect_place=pygine.RIGHT_BOTTOM)
+                pygine.draw_text(screen,"neues Quiz",27*self.text_size,screen.get_width()-15,screen.get_height()-15,color=(150,150,150),rect_place=pygine.RIGHT_BOTTOM)
 
     def get_using_teams(self) -> bool:
         teams = {team:0 for team in self.teams}

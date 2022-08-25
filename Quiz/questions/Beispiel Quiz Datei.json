@@ -15,6 +15,7 @@
       "Question read time": 0,
       "Answers": ["Mit beliebig vielen Antwortmöglichkeiten","Antwort 2"," Antwort 3","Antwort 4","Antwort 5"],
       "Correct Answer": 0,
+      "Answer Explanation": "Als Erklärung für die Antwort kann hier noch ein sehr langer Text stehen, zum Beispiel Lorem Ipsum und wie auch immer dasa weiter ging, da habe ich selbst keine Ahnung",
       "Shuffle Answers": true,
       "Points mode": "Add/remove points",
       "reduction for wrong answer": 20,
@@ -24,6 +25,7 @@
     {
       "Type": "Building up Image",
       "Image": "Beispiel Bild.png",
+      "Question": "Was ist hier zu sehen?",
       "Answer": "Moderne Kunst",
       "Building Type": "Dots",
       "Building Size": 25,
@@ -33,12 +35,14 @@
       "Points mode": "Time points",
       "start points": 150,
       "point reduction per second": 10,
-      "min points": 30
+      "min points": 30,
+      "reduction for wrong answer": 20
     },
 
     {
       "Type": "Building up Image",
       "Image": "Beispiel Bild.png",
+      "Question": "Was ist hier zu sehen?",
       "Answer": "Moderne Kunst",
       "Building Type": "Rect",
       "Building Size": 25,
@@ -48,7 +52,8 @@
       "Points mode": "Time points",
       "start points": 150,
       "point reduction per second": 10,
-      "min points": 30
+      "min points": 30,
+      "reduction for wrong answer": 20
     },
 
     {

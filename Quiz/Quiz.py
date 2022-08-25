@@ -40,6 +40,7 @@ class Quiz():
         self.__question_time_add = 0
         self.__question_time_start = None
         self.__question_answer_time = None
+        self.__solution = ""
         self.num_total_questions_to_ask = min([self.num_total_questions_to_ask,len(self.orig_questions)])
         self.question_attributes = {}  # other attributes needed to draw a question (filled in set_question_attributes)
         # check questions correct
@@ -49,11 +50,13 @@ class Quiz():
                 # question
                 if question["Type"] == "Multiple Choice":
                     val = question["Question"]
+                    ans = question["Answers"]
                     anz = len(question["Answers"])
                     if not 0 <= question["Correct Answer"] < anz:
                         raise Exception("Correct answer out of Answers range")
                     val = question["Question read time"]
                 elif question["Type"] == "Building up Image":
+                    val = question["Question"]
                     val = question["Answer"]
                     pygine.load_image(project_name,["img",question["Image"]])
                     val = question["Building Time"]
@@ -71,6 +74,7 @@ class Quiz():
                     val = self.question["start points"]
                     val = self.question["point reduction per second"]
                     val = self.question["min points"]
+                    val = self.question["reduction for wrong answer"]
             except Exception as e:
                 raise Exception(f"Error in Question {count+1} of quiz file: {e}")
 
@@ -78,21 +82,20 @@ class Quiz():
         self.__question_time_start = None
         self.__question_time_add = 0
         self.__question_answer_time = None
+        self.text_size = text_size
         self.question_attributes = {}
+        if self.num_total_questions_to_ask <= self.num_asked_questions:
+            return True
         if self.questions_random:
             self.__current_question_idx = choice(self.__list_left_questions)
             del self.__list_left_questions[self.__list_left_questions.index(self.__current_question_idx)]
-            if self.num_asked_questions == self.num_total_questions_to_ask +1:
-                return True
         else:
             self.__current_question_idx += 1
-            if self.num_asked_questions == self.num_total_questions_to_ask +1:
-                return True
         self.set_question_attributes(size,text_size)
         print(self.answer)
         return False
-    def next_question(self,result_last_question,size,text_size):
-        if result_last_question or not self.reask_wrong_questions:
+    def next_question(self,ask_again,size,text_size):
+        if not ask_again:
             return self.start_question(size,text_size)
         else:
             self.__question_time_add = self.seconds_on_question
@@ -104,9 +107,10 @@ class Quiz():
     def set_question_attributes(self,size,text_size):
         # is called once the question is selected or the screen resized, to for example calculate the size of text rectangles
         copy = self.question_attributes.copy()
-        self.question_attributes = {}  # dict for storing attributes
         self.text_size = text_size
+        self.question_attributes = {}  # dict for storing attributes
         if self.question["Type"] == "Multiple Choice":
+            self.__solution = self.question["Answers"][self.question["Correct Answer"]]
             # split question in lines
             self.question_attributes["texts"] = pygine.split_text_into_lines_fitting_width(self.question["Question"],50*text_size,size[0]-50)
             # split answers into lines
@@ -124,17 +128,19 @@ class Quiz():
             self.question_attributes["rects"] = []
             num_answers = len(self.question["Answers"])
             rect_height = max_lines*40*text_size+30
-            total_height = size[1]-len(self.question_attributes["texts"])*60*text_size-75-30
+            total_height = size[1]-len(self.question_attributes["texts"])*60*text_size-75*self.text_size-30
             distance = (total_height-rect_height*ceil(num_answers/2)) / (ceil(num_answers/2)+1)
-            y_start = len(self.question_attributes["texts"])*60*text_size+75+15+distance
+            y_start = len(self.question_attributes["texts"])*60*text_size+75*self.text_size+15+distance
             for num in range(num_answers):
                 quaters_of_width = 3 if num%2 != 0 else (1 if num != num_answers-1 else 2)
                 self.question_attributes["rects"].append(pygame.Rect(size[0] * quaters_of_width / 4 - max_width/2, y_start + (distance + rect_height) * floor(num / 2), max_width, rect_height))
         elif self.question["Type"] == "Building up Image":
+            self.__solution = self.question["Answer"]
+            self.question_attributes["texts"] = pygine.split_text_into_lines_fitting_width(self.question["Question"],35*text_size,size[0]-50)
             if self.question["Building Type"] == "Random":
                 self.question["Building Type"] = choice(["Rect","Dots"])
             img = pygine.load_image(self.project_name,["img",self.question["Image"]])
-            small_img,pos,factor = pygine.get_image_fit_into_rect(img,pygame.Rect(0,0,size[0]-20,size[1]-140))
+            small_img,pos,factor = pygine.get_image_fit_into_rect(img, pygame.Rect(0, 0, size[0] - 20, size[1] - len(self.question_attributes["texts"])*60*text_size+30*self.text_size-75*self.text_size-30))
             self.question_attributes["img"] = small_img
             self.question_attributes["pos"] = pos
             if "mask" in copy:
@@ -154,31 +160,33 @@ class Quiz():
                     for y in range(0, small_img.get_height(), build_size):
                         self.question_attributes["positions"].append((x,y))
         elif self.question["Type"] == "Question":
-            self.question_attributes["texts"] = pygine.split_text_into_lines_fitting_width(self.question["Question"],50*text_size,size[0]-50)
+            self.__solution = self.question["Answer"]
+            self.question_attributes["texts"] = pygine.split_text_into_lines_fitting_width(self.question["Question"],35*text_size,size[0]-50)
             if "Image" in self.question:
                 img = pygine.load_image(self.project_name, ["img", self.question["Image"]])
-                small_img, pos, factor = pygine.get_image_fit_into_rect(img, pygame.Rect(0, 0, size[0] - 20, size[1] - len(self.question_attributes["texts"])*60*text_size-75-30))
+                small_img, pos, factor = pygine.get_image_fit_into_rect(img, pygame.Rect(0, 0, size[0] - 20, size[1] - len(self.question_attributes["texts"])*60*text_size+30*self.text_size-75*self.text_size-30))
                 self.question_attributes["img"] = small_img
                 self.question_attributes["pos"] = pos
     def draw(self,screen:pygame.Surface):
         # is called every frame to draw the question
         if self.__question_time_start is None: self.__question_time_start = time.time()
-        pygine.draw_text(screen, f"Frage {self.num_asked_questions}/{self.num_total_questions_to_ask}", 25, 10, 10, color=self.text_color)
+        pygine.draw_text(screen, f"Frage {self.num_asked_questions}/{self.num_total_questions_to_ask}", 25*self.text_size, 10, 10, color=self.text_color)
         if self.question["Type"] == "Multiple Choice":
             for count,line in enumerate(self.question_attributes["texts"]):
                 if time.time() - self.__question_time_start < self.question["Question read time"]:
                     pygine.draw_text(screen, line, 50*self.text_size, int(screen.get_width() / 2), int((screen.get_height()/2)-(len(self.question_attributes["texts"])*60*self.text_size)/2+count*60*self.text_size), color=self.text_color, rect_place=pygine.CENTER)
                 else:
-                    pygine.draw_text(screen, line, 50*self.text_size, int(screen.get_width() / 2), 75+count*60*self.text_size, color=self.text_color, rect_place=pygine.CENTER)
+                    pygine.draw_text(screen, line, 50*self.text_size, int(screen.get_width() / 2), 75*self.text_size+count*60*self.text_size, color=self.text_color, rect_place=pygine.CENTER)
             if time.time() - self.__question_time_start > self.question["Question read time"]:
                 for rect,lines in zip(self.question_attributes["rects"],self.question_attributes["answers"]):
-                    pygame.draw.rect(screen,self.rect_color,rect,border_radius=8)
+                    pygame.draw.rect(screen,self.rect_color,rect,border_radius=int(8*self.text_size))
                     for count,line in enumerate(lines):
                         pygine.draw_text(screen,line,35*self.text_size,rect.left+rect.w/2,rect.center[1]-(len(lines)*40*self.text_size)/2+count*40*self.text_size,rect_place=pygine.TOP,color=self.text_on_rect_color)
         elif self.question["Type"] == "Building up Image":
-            pygine.draw_text(screen, "Was ist hier zu sehen?", 50*self.text_size, int(screen.get_width() / 2), 75, color=self.text_color, rect_place=pygine.CENTER)
-            screen.blit(self.question_attributes["img"],(10+self.question_attributes["pos"].x,125+self.question_attributes["pos"].y))
-            screen.blit(self.question_attributes["mask"],(10+self.question_attributes["pos"].x,125+self.question_attributes["pos"].y))
+            for count, line in enumerate(self.question_attributes["texts"]):
+                    pygine.draw_text(screen, line, 50*self.text_size, int(screen.get_width() / 2), 75*self.text_size+count*60*self.text_size, color=self.text_color, rect_place=pygine.CENTER)
+            screen.blit(self.question_attributes["img"],(10+self.question_attributes["pos"].x, len(self.question_attributes["texts"])*60*self.text_size-30*self.text_size+75*self.text_size+15 + self.question_attributes["pos"].y))
+            screen.blit(self.question_attributes["mask"],(10+self.question_attributes["pos"].x, len(self.question_attributes["texts"])*60*self.text_size-30*self.text_size+75*self.text_size+15 + self.question_attributes["pos"].y))
             s = self.question_attributes["mask"].get_size()
             if time.time() - self.question_attributes["time last change"] > self.question_attributes["time between changes"]:
                 self.question_attributes["time last change"] = time.time()
@@ -193,8 +201,8 @@ class Quiz():
         elif self.question["Type"] == "Question":
             if "Image" in self.question:
                 for count, line in enumerate(self.question_attributes["texts"]):
-                    pygine.draw_text(screen, line, 50*self.text_size, int(screen.get_width() / 2), 75+count*60*self.text_size, color=self.text_color, rect_place=pygine.CENTER)
-                screen.blit(self.question_attributes["img"], (10 + self.question_attributes["pos"].x, len(self.question_attributes["texts"])*60*self.text_size+75+15 + self.question_attributes["pos"].y))
+                    pygine.draw_text(screen, line, 50*self.text_size, int(screen.get_width() / 2), 75*self.text_size+count*60*self.text_size, color=self.text_color, rect_place=pygine.CENTER)
+                screen.blit(self.question_attributes["img"], (10 + self.question_attributes["pos"].x, len(self.question_attributes["texts"])*60*self.text_size-30*self.text_size+75*self.text_size+15 + self.question_attributes["pos"].y))
             else:
                 for count, line in enumerate(self.question_attributes["texts"]):
                     pygine.draw_text(screen, line, 50*self.text_size, int(screen.get_width()/2), int((screen.get_height()/2)-(len(self.question_attributes["texts"])*60*self.text_size)/2+count*60*self.text_size), color=self.text_color, rect_place=pygine.CENTER)
@@ -209,8 +217,19 @@ class Quiz():
         elif self.question["Points mode"] == "Time points":
             if correct:
                 return max([self.question["start points"] - self.seconds_on_question * self.question["point reduction per second"], self.question["min points"]])
+            else:
+                return - self.question["reduction for wrong answer"]
         return 0
 
+    
+    @property
+    def solution(self):
+        return self.__solution
+    @property
+    def solution_explanation(self):
+        if "Answer Explanation" in self.question:
+            return self.question["Answer Explanation"]
+        return ""
     ##### use this to adjust the anser information printed for the game master #####
     @property
     def answer(self):
@@ -252,6 +271,7 @@ def get_quiz_list(project_name):
                 q = Quiz(join(dir,file),project_name)
                 quizes.append(q)
         except Exception as e:
-            raise Warning(file,":",e)
+            print("Error in quiz file:",file)
+            raise Warning(e)
     print(f"found {len(quizes)} Quizes")
     return quizes

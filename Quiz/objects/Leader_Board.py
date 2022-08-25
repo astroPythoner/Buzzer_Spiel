@@ -1,4 +1,5 @@
 ##i## Image files that belong to this object
+##i## Image files that belong to this object
 # these should also be placed in the folder 'objects'
 # the first filename is the default
 ##ni##
@@ -19,7 +20,6 @@ class Leader_Board(World_2d.Objects.Object):
         self.text_on_rect_color = text_on_rect_color
         self.text_size = text_size
         self.quiz_result = quiz_result
-        self.deleted_asking_correct = False
         self.using_teams = using_teams
         self.teams = teams
         self.players = players
@@ -56,7 +56,7 @@ class Leader_Board(World_2d.Objects.Object):
         return min([time.time()-self.time,1])
 
     def get_draw_on_top(self):
-        return not self.quiz_result or time.time()-self.time < 2
+        return not self.quiz_result # or time.time()-self.time < 2
 
     def draw(self,surface:pygame.Surface, offset:vec2, zoom:float):
         p = self.percent_over()
@@ -65,7 +65,7 @@ class Leader_Board(World_2d.Objects.Object):
             for count,pos in enumerate(self.start_pos):
                 if count != self.player_idx:
                     pos = self.start_pos[count] + (self.end_pos[count]-self.start_pos[count])*p
-                    pygame.draw.rect(surface, self.rect_color, (int(surface.get_width() / 2 - self.width/2), int(pos-22*self.text_size), self.width, 44*self.text_size), border_radius=8)
+                    pygame.draw.rect(surface, self.rect_color, (int(surface.get_width() / 2 - self.width/2), int(pos-22*self.text_size), self.width, 44*self.text_size), border_radius=int(8*self.text_size))
                     pygine.draw_text(surface, self.names[count],30*self.text_size,int(surface.get_width() / 2 - self.width/2 +8), int(pos),rect_place=pygine.LEFT,color=self.text_on_rect_color)
                     pygine.draw_text(surface, str(round(self.points[count])), 30*self.text_size, int(surface.get_width() / 2 + self.width/2 -8), int(pos), rect_place=pygine.RIGHT, color=self.text_on_rect_color)
             # answering player
@@ -73,15 +73,12 @@ class Leader_Board(World_2d.Objects.Object):
             points = self.player_start_points + (self.player_end_points-self.player_start_points)*p
             color = (100, 200, 100) if self.player_end_points > self.player_start_points else (200,100,100)
             pos = self.start_pos[self.player_idx] + (self.end_pos[self.player_idx] - self.start_pos[self.player_idx]) * p
-            pygame.draw.rect(surface, color, (int(surface.get_width() / 2 - (self.width * size) / 2), int(pos - (44*self.text_size * size) / 2), int(self.width * size), int(44*self.text_size * size)), border_radius=8)
+            pygame.draw.rect(surface, color, (int(surface.get_width() / 2 - (self.width * size) / 2), int(pos - (44*self.text_size * size) / 2), int(self.width * size), int(44*self.text_size * size)), border_radius=int(8*self.text_size))
             pygine.draw_text(surface, self.names[self.player_idx], int(30*size*self.text_size), int(surface.get_width() / 2 - (self.width * size) / 2 + 8), int(pos), rect_place=pygine.LEFT, color=(255, 255, 255))
             pygine.draw_text(surface, str(round(points)), int(30*size*self.text_size), int(surface.get_width() / 2 + (self.width * size) / 2 - 8), int(pos), rect_place=pygine.RIGHT, color=(255, 255, 255))
         else:
             # Top 3 of players
-            if not self.deleted_asking_correct:
-                self.world.objects.delete_object(self.world.objects[0])
-                self.deleted_asking_correct = True
-            p = 1 if (t:=time.time()-self.time) > 2.5 else ((t-2)*2)
+            p = min((time.time()-self.time) * 2,1)
             for num,player in enumerate(self.after):
                 pygine.draw_text(surface, "Quiz vorbei", 35*self.text_size, int(surface.get_width()/2), 50, color=(255, 255, 255), rect_place=pygine.CENTER)
                 if num < 3:
@@ -92,7 +89,7 @@ class Leader_Board(World_2d.Objects.Object):
                     s = pygame.Surface((int(self.width),int((surface.get_height()-dest.y)*p)),pygame.SRCALPHA)
                     s.fill((0,0,0,150))
                     surface.blit(s,(int(dest.x-self.width/2),int(surface.get_height()-s.get_height())))
-                    pygame.draw.rect(surface, color, (int(pos.x - self.width / 2), int(pos.y - 22*self.text_size), int(self.width), 44*self.text_size), border_radius=8)
+                    pygame.draw.rect(surface, color, (int(pos.x - self.width / 2), int(pos.y - 22*self.text_size), int(self.width), 44*self.text_size), border_radius=int(8*self.text_size))
                     pygine.draw_text(surface, player[0], 30*self.text_size, int(pos.x - self.width / 2 + 8), int(pos.y), rect_place=pygine.LEFT, color=(255, 255, 255))
                     pygine.draw_text(surface, str(round(player[1])), 30*self.text_size, int(pos.x + self.width / 2 - 8), int(pos.y), rect_place=pygine.RIGHT, color=(255, 255, 255))
                     # teams
@@ -105,7 +102,7 @@ class Leader_Board(World_2d.Objects.Object):
                 # other players
                 else:
                     size = 0.65
-                    pos = vec2(surface.get_width()*((num*2-5)/((len(self.after)-3)*2)),surface.get_height()-65)
-                    pygame.draw.rect(surface, self.rect_color, (int(pos.x - (self.width * size) / 2), int(pos.y - (44*self.text_size * size) / 2), int(self.width * size), int(44*self.text_size * size)), border_radius=8)
+                    pos = vec2(surface.get_width()*((num*2-5)/((len(self.after)-3)*2)),surface.get_height()-65*self.text_size)
+                    pygame.draw.rect(surface, self.rect_color, (int(pos.x - (self.width * size) / 2), int(pos.y - (44*self.text_size * size) / 2), int(self.width * size), int(44*self.text_size * size)), border_radius=int(8*self.text_size))
                     pygine.draw_text(surface, str(num+1)+": "+player[0], int(30*self.text_size * size), int(pos.x - (self.width * size) / 2 + 8), int(pos.y), rect_place=pygine.LEFT, color=self.text_on_rect_color)
                     pygine.draw_text(surface, str(round(player[1])), int(30*self.text_size * size), int(pos.x + (self.width * size) / 2 - 8), int(pos.y), rect_place=pygine.RIGHT, color=self.text_on_rect_color)

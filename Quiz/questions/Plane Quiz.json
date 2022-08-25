@@ -1,0 +1,86 @@
+{
+  "Name": "Plane Quiz",
+  "Questions Random": true,
+  "ask wrong questions again": true,
+  "Number asked questions": 6,
+  "Background file": "",
+  "Text color": [255,255,255],
+  "Rect color": [63, 91, 204],
+  "Text on Rect color": [0,0,0],
+
+  "Questions": [
+    {
+      	"Type": "Question",
+      	"Question": "Wann wurde der Verein gegründet?",
+      	"Answer": "1975",
+      	"Points mode": "Add/remove points",
+      	"reduction for wrong answer": 20,
+      	"points for right answer": 70
+    },
+    
+    {
+      	"Type": "Question",
+      	"Question": "Wann wurde das Planetarium eröffnet?",
+      	"Answer": "1990",
+      	"Points mode": "Add/remove points",
+      	"reduction for wrong answer": 20,
+      	"points for right answer": 70
+    },
+    
+    {
+      	"Type": "Question",
+      	"Question": "Wann wurde die Sternwarte angebaut?",
+      	"Answer": "1997",
+      	"Points mode": "Add/remove points",
+      	"reduction for wrong answer": 20,
+      	"points for right answer": 70
+    },
+    
+    {
+    	"Type": "Building up Image",
+	"Image": "Geheimnis Dunkle Materie.png",
+	"Question": "Aus welcher Show ist dieser Screenshot?",
+	"Answer": "Sofia",
+	"Answer Explanation": "In dieser Szene werden die unterschiedlichen Lichtfrequenzen insbesondere das Infrarotlicht erklärt",
+        "Building Type": "Dots",
+        "Building Size": 25,
+        "Building Time": 40,
+        "Top Color": [30,30,30],
+        "Points mode": "Time points",
+        "start points": 150,
+        "point reduction per second": 10,
+        "min points": 30,
+        "reduction for wrong answer": 20
+    },
+    
+    {
+    	"Type": "Building up Image",
+	"Image": "Sterngala Interview.jpg",
+	"Question": "An welchem Anlass ist dieses Bild entstanden?",
+	"Answer": "Sternengala mit Lsch und Genzel",
+	"Answer Explanation": "Bei der Sternengala gibt Michael ein Interview für Regio TV",
+        "Building Type": "Dots",
+        "Building Size": 25,
+        "Building Time": 40,
+        "Top Color": [30,30,30],
+        "Points mode": "Time points",
+        "start points": 150,
+        "point reduction per second": 10,
+        "min points": 30,
+        "reduction for wrong answer": 20
+    },
+    
+    {
+	"Type": "Multiple Choice",
+	"Question": "Wie scher ist der Komet Blaubeuren?",
+	"Question read time": 1,
+	"Answers": ["23 kg", "27 kg", "30 kg", "34 kg"],
+	"Correct Answer": 2,
+	"Answer Explanation": "Der Komet Blaubeuren wurde am 12.07.2022 bei einer Veranstaltung des Top Magazins von Dieter Heinlein präsentiert",
+	"Shuffle Answers": true,
+      	"Points mode": "Add/remove points",
+      	"reduction for wrong answer": 20,
+      	"points for right answer": 70
+    }
+  ]
+}
