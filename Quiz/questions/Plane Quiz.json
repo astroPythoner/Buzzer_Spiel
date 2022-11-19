@@ -38,7 +38,7 @@
     
     {
     	"Type": "Building up Image",
-	"Image": "Geheimnis Dunkle Materie.png",
+	"Image": "Beispiel Bild.png",
 	"Question": "Aus welcher Show ist dieser Screenshot?",
 	"Answer": "Sofia",
 	"Answer Explanation": "In dieser Szene werden die unterschiedlichen Lichtfrequenzen insbesondere das Infrarotlicht erklärt",
@@ -55,7 +55,7 @@
     
     {
     	"Type": "Building up Image",
-	"Image": "Sterngala Interview.jpg",
+	"Image": "Beispiel Bild.png",
 	"Question": "An welchem Anlass ist dieses Bild entstanden?",
 	"Answer": "Sternengala mit Lsch und Genzel",
 	"Answer Explanation": "Bei der Sternengala gibt Michael ein Interview für Regio TV",

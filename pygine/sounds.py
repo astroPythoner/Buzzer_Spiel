@@ -26,7 +26,7 @@ class Sounds():
         """loads background music from file"""
         pygame.mixer.music.load(file_name)
         pygame.mixer.music.set_volume(self.__background_music_volume)
-        pygame.mixer.music.play()
+        pygame.mixer.music.play(-1)
 
     def set_background_music_volume(self, value:float):
         """sets volume of the background (0-1) value will be forced to be in the range"""

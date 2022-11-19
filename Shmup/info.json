@@ -1,0 +1,1 @@
+{"dimensions": "2D", "name": "Shmup", "description": "A game developed with pygine", "type": "Space Invaders like game", "author": "AstroPythoner (c) pygine", "players": "1 to 3", "playable with": [1, 4], "playable_with": [1, 4]}
